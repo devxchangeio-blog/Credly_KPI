@@ -1,0 +1,28 @@
+@namespace "library://ns.adobe.com/flex/spark";
+
+Application {
+	color:#000000;
+	/*backgroundColor:#3263A4;*/
+	chromeColor:#5D8AA8;
+	backgroundColor:#ffffff;
+}
+
+List.blueTheme {
+	/*selectionColor: #7FACF6;*/
+	selectionColor: #F0F8FF;
+}
+
+List.greenTheme {
+	selectionColor: #00CF3F;
+}
+
+Panel.blueTheme {
+	contentBackgroundColor: #D4AF37;
+	
+}
+
+.blueTheme {
+	focusColor: #3D73EF;
+	symbolColor: #2A3982;
+	
+}

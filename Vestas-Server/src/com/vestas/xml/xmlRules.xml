@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE digester-rules 
+  PUBLIC "-//Jakarta Apache //DTD digester-rules XML V1.0//EN" 
+    "http://jakarta.apache.org/commons/digester/dtds/digester-rules.dtd">
+
+<digester-rules>
+	<pattern value="export">
+		<pattern value="row">
+			<object-create-rule classname="spring.mvc.model.Row" />
+			<set-properties-rule />
+			<set-next-rule methodname="addRow" />
+			<pattern value="cell">
+				<object-create-rule classname="spring.mvc.model.Cell" />
+				<call-method-rule methodname="setValue" paramcount="0" />
+				<set-next-rule methodname="addCell" />
+			</pattern>
+		</pattern>
+	</pattern>
+</digester-rules>

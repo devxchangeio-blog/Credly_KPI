@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL MAP 2.0//EN" 
+	"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="User">
+
+	<resultMap id="fetchUserProfileResultMap" class="com.vestas.model.EmployeeDetails">
+		<result property="seniorityPosition" column="Seniority_position" />
+		<result property="seniorityVestas" column="Seniority_Vestas" />
+		<result property="nationality" column="Nationality" />
+		<result property="ownTermination" column="Own_Termination" />
+		<result property="vestasTermination" column="Vestas_Termination" />
+		<result property="buTransfer" column="BU_Transfer" />
+		<result property="countryOfEmployment" column="Country_of_employment" />
+		<result property="region" column="Region" />
+		<result property="gender" column="Gender" />
+		<result property="position" column="Position" />
+		<result property="Function" column="Function" />
+		<result property="period" column="Period" />
+		<result property="ipe" column="IPE" />
+		<result property="newVestas" column="New_Vestas" />
+		<result property="lateralChange" column="Lateral_change" />
+		<result property="promotion" column="Promotion" />
+		<result property="filledPosition" column="Filled_Position" />
+		<result property="doj" column="Date_of_join" />
+		<result property="exitMonth" column="Exit_Month" />
+
+	</resultMap>
+
+	<select id="fetchUserProfile" resultMap="fetchUserProfileResultMap">
+       <![CDATA[
+        select * from employee_details_stg_tb
+        ]]>
+
+	</select>
+
+	<resultMap id="loginValidationResultMap" class="com.vestas.model.UserParams">
+		<result property="username" column="username" />
+		<result property="password" column="password" />
+	</resultMap>
+
+	<select id="loginValidation" resultMap="loginValidationResultMap">
+       <![CDATA[
+       			 select username,password from dummy_user_table where username=#username# and password=#password#
+        ]]>
+
+	</select>
+
+	<resultMap id="injuryDetailResultMap" class="com.vestas.model.InjuryDetails">
+		<result property="countryOfEmployment" column="Country_of_employment" />
+		<result property="region" column="Region" />
+		<result property="Function" column="Function" />
+		<result property="period" column="Period" />
+		<result property="ipe" column="IPE" />
+		<result property="organization" column="Organization" />
+		<result property="jobs" column="Job" />
+		<result property="salariedPaid" column="Salaried_Paid" />
+		<result property="hourlyPaid" column="Hourly_Paid" />
+		<result property="noOfRepotableInjuries" column="No_of_reportable_injuries" />
+		<result property="totalWorkingHours" column="Total_Working_Hours" />
+		<result property="updatedDate" column="Updated_date" />
+		<result property="position" column="Position" />
+		<result property="incidenceInjuries" column="Incidence_injuries" />
+	</resultMap>
+
+	<select id="fetchInjuryDetail" resultMap="injuryDetailResultMap">
+       <![CDATA[
+       			 select * from injury_details_tb
+        ]]>
+
+	</select>
+
+
+	<resultMap id="fetchAbsenceDetailsResultMap" class="com.vestas.model.AbsenceDetails">
+		<result property="countryOfEmployment" column="Country_of_employment" />
+		<result property="region" column="Region" />
+		<result property="Function" column="Function" />
+		<result property="period" column="Period" />
+		<result property="ipe" column="IPE" />
+		<result property="organization" column="Organization" />
+		<result property="job" column="Job" />
+		<result property="salariedPaid" column="Salaried_Paid" />
+		<result property="hourlyPaid" column="Hourly_Paid" />
+		<result property="updatedDate" column="Updated_date" />
+		<result property="position" column="Position" />
+		<result property="totalHours" column="Country_of_employment" />
+		<result property="absenceHours" column="Region" />
+		<result property="totalIllnessHours" column="Function" />
+		<result property="totShortIllnessHours" column="Period" />
+		<result property="totLongIllnessHours" column="IPE" />
+		<result property="injuryHours" column="Organization" />
+		<result property="totOthersHours" column="Job" />
+		<result property="maternityHours" column="Salaried_Paid" />
+		<result property="childIllnessHours" column="Hourly_Paid" />
+		<result property="holidayHours" column="Updated_date" />
+		<result property="otherHours" column="Position" />
+		<result property="dollar56Hours" column="IPE" />
+		<result property="flexHours" column="Organization" />
+		<result property="percentageIllness" column="Job" />
+		<result property="attendenceHours" column="Salaried_Paid" />
+		<result property="organization" column="Hourly_Paid" />
+	</resultMap>
+
+	<select id="fetchAbsenceDetails" resultMap="fetchAbsenceDetailsResultMap">
+       <![CDATA[
+       			 select * from absence_details_tb
+        ]]>
+
+	</select>
+
+
+
+</sqlMap>
+

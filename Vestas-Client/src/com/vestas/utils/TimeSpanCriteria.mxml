@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009"
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   backgroundColor="white"  
+		   width="100%">
+	<fx:Declarations>
+		<s:RadioButtonGroup id="radiogroup"
+							change="radiogroup_changeHandler(event)"/>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.radioButtonGroup{
+			background-color:"white";
+		}
+		.radioButton{
+			background-color:"white";
+		}
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var isMonthly:Boolean=true;
+			[Bindable]
+			private var isYearly:Boolean=false;
+			[Bindable]
+			private var isQuarterly:Boolean=false;
+			[Bindable]
+			private var isHalfYearly:Boolean=false;
+			[Bindable]
+			private var isWeekly:Boolean=false;
+
+			[Bindable]
+			public var monthArray:ArrayCollection;
+			[Bindable]
+			public var yearArray:ArrayCollection;
+			[Bindable]
+			public var quartelyArray:ArrayCollection;
+			[Bindable]
+			public var halfYearlyArray:ArrayCollection;
+			[Bindable]
+			public var weeklyArray:ArrayCollection;
+
+			protected function radiogroup_changeHandler(event:Event):void
+			{
+				if (radiogroup.selection.id == 'monthly')
+				{
+					isYearly=false;
+					isMonthly=true;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=false;
+				}
+				else if (radiogroup.selection.id == 'yearly')
+				{
+					isYearly=true;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=false;
+				}
+				else if (radiogroup.selection.id == 'quarterly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=true;
+					isHalfYearly=false;
+					isWeekly=false;
+				}
+				else if (radiogroup.selection.id == 'halfYearly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=true;
+					isWeekly=false;
+				}
+				else if (radiogroup.selection.id == 'weekly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=true;
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:HGroup>
+
+		<s:HGroup>
+			<s:RadioButton id="monthly"
+						   selected="true"
+						   label="Month"
+						   groupName="radiogroup" focusColor="#FFFFFF"/>
+			<s:DropDownList enabled="{isMonthly}"
+							dataProvider="{monthArray}"/>
+		</s:HGroup>
+
+		<s:HGroup>
+			<s:RadioButton id="yearly"
+						   label="Year"
+						   groupName="radiogroup" focusColor="#FFFFFF"/>
+			<s:DropDownList enabled="{isYearly}"
+							dataProvider="{yearArray }"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:RadioButton id="quarterly"
+						   label="Quarter"
+						   groupName="radiogroup" focusColor="#FFFFFF"/>
+			<s:DropDownList enabled="{isQuarterly}"
+							dataProvider="{quartelyArray}"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:RadioButton id="halfYearly"
+						   label="Half-Yearly"
+						   groupName="radiogroup" focusColor="#FFFFFF"/>
+			<s:DropDownList enabled="{isHalfYearly}"
+							dataProvider="{halfYearlyArray}"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:RadioButton id="weekly"
+						   label="Weekly" focusColor="#FFFFFF"
+						   groupName="radiogroup"/>
+			<s:DropDownList enabled="{isWeekly}"
+							dataProvider="{weeklyArray}"/>
+		</s:HGroup>
+	</s:HGroup>
+
+</mx:Canvas>

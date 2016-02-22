@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:view="com.vestas.view.*"
+					width="100%" height="100%" creationComplete="init()" show="onShow()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.vestas.controller.VestasController;
+			import com.vestas.events.VestasApplicationEvent;
+			import com.vestas.model.UserParams;
+			import com.vestas.utils.ArrayCollectionExtended;
+			
+			import mx.controls.Alert;
+			
+			import org.swizframework.Swiz;
+			
+			import spark.components.Label;
+
+			[Autowire(bean="controller")]
+			[Bindable]
+			public var controller:VestasController;
+			
+			[Embed(source="/assets/vestas.png")]
+			[Bindable]
+			public var img1:Class;
+			
+			[Embed(source="/assets/tail.png")]
+			[Bindable]
+			public var img2:Class;
+			
+			private var isMainView:Boolean=true;
+
+			private function onShow():void
+			{
+				
+			}
+
+			public function init():void
+			{
+				Swiz.addEventListener(VestasApplicationEvent.LOGIN_SUCCESS, onSuccess);
+				Swiz.addEventListener(VestasApplicationEvent.CHANGE_VIEW, changeView);
+				
+				if(vs.selectedChild==loginView){
+					logout.visible=false
+				}
+				
+				controller.fetchUserProfile();
+				controller.fetchInjuryDetail();
+
+			}
+
+			[Mediate(event="com.vestas.events.VestasApplicationEvent.LOGIN_SUCCESS")]
+			protected function onSuccess(event:VestasApplicationEvent):void
+			{
+				if (event.params['isValidUser'] == true)
+				{
+					vs.selectedChild=mainView;
+					logout.visible=true;
+				}
+				else
+				{
+					Alert.show("Username and Password is not valid");
+				}
+
+			}
+
+			[Mediate(event="VestasApplicationEvent.CHANGE_VIEW")]
+			protected function changeView(event:VestasApplicationEvent):void
+			{
+				switch (event.params['view'])
+				{
+					case "internalFillRate":
+						vs.selectedChild=internalFillRateView;
+					//	headLabel.text="You are in : Internal Fill Rate";
+						break;
+					case "empTurnover":
+						vs.selectedChild=etView;
+						controller.fetchUserProfile();
+					//	headLabel.text="You are in : Employee Turnover"
+						break;
+					case "injuries":
+						vs.selectedChild=injuriesView;
+					//	headLabel.text="You are in : Injuries Details"
+						break;
+					case "absence":
+						vs.selectedChild=absenceView;
+						//headLabel.text="You are in : Absence Details"
+						break;
+					case "rentention12Months":
+						vs.selectedChild=retentionView;
+						//headLabel.text="You are in : Retention 12 Months"
+						break;
+
+				}
+				logout.visible=true;
+				logout.text="Home";
+
+			}
+
+			public function backToHome(evt:MouseEvent):void
+			{
+				if ((evt.currentTarget as Label).text == "Home")
+				{
+					vs.selectedChild=mainView;
+					logout.visible=true
+					logout.text="Logout";
+
+				}
+				else
+				{
+					vs.selectedChild=loginView;
+					logout.visible=false
+				}
+
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+
+		<fx:Array id="nationalityArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="American" data="American"/>
+			<fx:Object label="British" data="British"/>
+			<fx:Object label="French" data="French"/>
+			<fx:Object label="German" data="German"/>
+		</fx:Array>
+		<fx:Array id="functionArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="GR &amp; I" data="GR&amp;I"/>
+			<fx:Object label="Engineering" data="Engineering"/>
+			<fx:Object label="Plant Solutions" data="Plant Solutions"/>
+			<fx:Object label="Plant Operations" data="Plant Operations"/>
+			<fx:Object label="Platforms" data="Platforms"/>
+			<fx:Object label="Finance &amp; Business Support" data="Finance&amp;Business Support"/>
+			<fx:Object label="People &amp; Culture" data="People &amp; Culture"/>
+			<fx:Object label="Product Management" data="Product Management"/>
+			<fx:Object label="Quality" data="Quality"/>
+		</fx:Array>
+
+		<fx:Array id="corporateLevelArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="IPE &lt;50" data="IPE &lt;50"/>
+			<fx:Object label="IPE 50-53" data="IPE 50-53"/>
+			<fx:Object label="IPE 54-56" data="IPE 54-56"/>
+			<fx:Object label="IPE 57-58" data="IPE 57-58"/>
+			<fx:Object label="IPE 59-61" data="IPE 59-61"/>
+		</fx:Array>
+
+		<fx:Array id="careerTrackArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="People &amp; Busienss Leaders" data="People &amp; Busienss Leaders"/>
+			<fx:Object label="Knowledge &amp; Innovation Leaders"
+					   data="Knowledge &amp; Innovation Leaders"/>
+			<fx:Object label="Project Leaders" data="Project Leaders"/>
+			<fx:Object label="Professional" data="Professional"/>
+			<fx:Object label="Administrative" data="Administrative"/>
+		</fx:Array>
+
+		<fx:Array id="countryArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="DK" data="DK"/>
+			<fx:Object label="UK" data="UK"/>
+			<fx:Object label="US" data="US"/>
+			<fx:Object label="SG" data="SG"/>
+			<fx:Object label="CH" data="CH"/>
+			<fx:Object label="IN" data="IN"/>
+			<fx:Object label="Others" data="Others"/>
+		</fx:Array>
+
+		<fx:Array id="regionArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="Europe" data="Europe"/>
+			<fx:Object label="US" data="US"/>
+			<fx:Object label="Asia" data="Asia"/>
+		</fx:Array>
+
+		<s:ArrayCollection id="monthArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="Jan 2011" data="Jan 2011" month="1"/>
+			<fx:Object label="Feb 2011" data="Feb 2011" month="2"/>
+			<fx:Object label="Mar 2011" data="Mar 2011" month="3"/>
+			<fx:Object label="Apr 2011" data="Apr 2011" month="4"/>
+			<fx:Object label="May 2011" data="May 2011" month="5"/>
+			<fx:Object label="Jun 2011" data="Jun 2011" month="6"/>
+			<fx:Object label="Jul 2011" data="Jul 2011" month="7"/>
+
+			<fx:Object label="Aug 2011" data="Aug 2011" month="8"/>
+
+			<fx:Object label="Sep 2011" data="Sep 2011" month="9"/>
+
+			<fx:Object label="Oct 2011" data="Oct 2011" month="10"/>
+
+		</s:ArrayCollection>
+
+		<fx:Array id="genderArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="Male" data="Male"/>
+			<fx:Object label="Female" data="Female"/>
+		</fx:Array>
+
+		<fx:Array id="educationArray">
+		</fx:Array>
+
+		<fx:Array id="sipArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="&lt;1 Year" data="&lt;1 Year"/>
+			<fx:Object label="1-2 Years" data="1-2 Years"/>
+			<fx:Object label="3-4 Years" data="3-4 Years"/>
+			<fx:Object label="&gt;4 Years" data="&gt;4 Years"/>
+		</fx:Array>
+
+		<fx:Array id="sivArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="&lt;1 Year" data="&lt;1 Year"/>
+			<fx:Object label="1-2 Years" data="1-2 Years"/>
+			<fx:Object label="3-4 Years" data="3-4 Years"/>
+			<fx:Object label="&gt;4 Years" data="&gt;4 Years"/>
+		</fx:Array>
+
+		<fx:Array id="positionArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="Manager - Structure &amp; Systems"
+					   data="Manager - Structure &amp; Systems"/>
+			<fx:Object label="Engineer - ECM" data="Engineer - ECM"/>
+			<fx:Object label="Director" data="Director"/>
+			<fx:Object label="Senior Project Manager - Wind &amp; Site"
+					   data="Senior Project Manager - Wind &amp; Site"/>
+			<fx:Object label="Specialist" data="Specialist"/>
+		</fx:Array>
+
+		<s:ArrayCollection id="yearArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="2011" data="2011"/>
+			<fx:Object label="2010" data="2010"/>
+		</s:ArrayCollection>
+
+		<s:ArrayCollection id="quarterArray">
+			<fx:Object label="All" data="all"/>
+			<fx:Object label="First Quarter" data="First Quarter"/>
+			<fx:Object label="Second Quarter" data="Second Quarter"/>
+			<fx:Object label="Third Quarter" data="Third Quarter"/>
+			<fx:Object label="Fourth Quarter" data="Fourth Quarter"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</s:layout>
+
+	<mx:HBox width="100%" height="50" backgroundColor="0xffffff" borderColor="#5D8AA8"
+			 borderStyle="outset" cornerRadius="10" paddingRight="10" verticalAlign="middle">
+		<mx:Canvas width="100%" height="48" verticalCenter="-2">
+			<mx:Image x="7" y="10" source="{img1}"/>
+		</mx:Canvas>
+		<mx:Canvas width="100%" height="48" verticalCenter="-2">
+			<mx:Image right="5" bottom="10" source="{img2}"/>
+		</mx:Canvas>
+	<!--	<s:Label color="0xFF9900"
+				 id="headLabel"
+				 horizontalCenter="left"
+				 fontSize="13"
+				 visible="{isETView}"
+				 fontWeight="bold"/>-->
+		<mx:VRule visible="{logout.visible}" width="1" height="85%"/>
+		<s:Label id="logout" buttonMode="true" click="backToHome(event)"
+				 fontSize="13" fontWeight="bold" name="home" text="Logout"
+				 textDecoration="underline"/>
+		<!--s:Label name="home"
+				 text="Home"
+				 visible="{isETView}"
+				 buttonMode="true"
+				 textDecoration="underline"
+				 fontWeight="bold"
+				 fontSize="13"
+				 click="backToHome(event)"/-->
+	</mx:HBox>
+
+	<mx:ViewStack id="vs" width="100%" height="100%">
+		<view:LoginView id="loginView"/>
+		<view:MainView id="mainView"/>
+		<view:EmployeeTurnoverView id="etView" careerTrackArray="{careerTrackArray}"
+								   corporateLevelArray="{corporateLevelArray}"
+								   countryArray="{countryArray}" functionArray="{functionArray}"
+								   genderArray="{genderArray}" monthArray="{monthArray}"
+								   nationalityArray="{nationalityArray}"
+								   positionArray="{positionArray}" quartelyArray="{quarterArray}"
+								   regionArray="{regionArray}" sipArray="{sipArray}"
+								   sivArray="{sivArray}" yearArray="{yearArray}"/>
+		<view:RetentionView id="retentionView" careerTrackArray="{careerTrackArray}"
+							corporateLevelArray="{corporateLevelArray}"
+							countryArray="{countryArray}" functionArray="{functionArray}"
+							genderArray="{genderArray}" monthArray="{monthArray}"
+							nationalityArray="{nationalityArray}" positionArray="{positionArray}"
+							quartelyArray="{quarterArray}" regionArray="{regionArray}"
+							sipArray="{sipArray}" sivArray="{sivArray}" yearArray="{yearArray}"/>
+		<view:InternalFillRateView id="internalFillRateView" careerTrackArray="{careerTrackArray}"
+								   corporateLevelArray="{corporateLevelArray}"
+								   countryArray="{countryArray}" functionArray="{functionArray}"
+								   genderArray="{genderArray}" monthArray="{monthArray}"
+								   nationalityArray="{nationalityArray}"
+								   positionArray="{positionArray}" quartelyArray="{quarterArray}"
+								   regionArray="{regionArray}" sipArray="{sipArray}"
+								   sivArray="{sivArray}" yearArray="{yearArray}"/>
+		<view:InjuriesView id="injuriesView" careerTrackArray="{careerTrackArray}"
+						   corporateLevelArray="{corporateLevelArray}" countryArray="{countryArray}"
+						   functionArray="{functionArray}" genderArray="{genderArray}"
+						   monthArray="{monthArray}" nationalityArray="{nationalityArray}"
+						   positionArray="{positionArray}" quartelyArray="{quarterArray}"
+						   regionArray="{regionArray}" sipArray="{sipArray}" sivArray="{sivArray}"
+						   yearArray="{yearArray}"/>
+		<view:AbsenceDetails id="absenceView"/>
+	</mx:ViewStack>
+</s:NavigatorContent>

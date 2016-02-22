@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="150" height="50">
+	<mx:ProgressBar x="0" y="19" width="150" height="10" label="" indeterminate="true" maximum="100"
+					minimum="0">
+	</mx:ProgressBar>
+</s:Group>

@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					xmlns:utils="com.vestas.utils.*"
+					width="100%" height="100%" initialize="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:SeriesInterpolate id="chartChange" duration="1000"/>
+		
+		<s:ArrayCollection id="ac" collectionChange="onCollectionChange(event)"
+						   source="{controller.userProfile.source}"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.vestas.controller.VestasController;
+			import com.vestas.servlet.CreatePDF;
+			import com.vestas.utils.ArrayCollectionExtended;
+			
+			import mx.charts.HitData;
+			import mx.charts.chartClasses.IAxis;
+			import mx.collections.ArrayCollection;
+			import mx.core.INavigatorContent;
+			import mx.core.UIComponent;
+			import mx.events.CollectionEvent;
+			
+			private var selectedPeriod:String="all";
+			private var selectedGender:String="all";
+			private var selectedCountry:String="all";
+			private var selectedNationality:String="all";
+			private var selectedSIP:String="all";
+			private var selectedSIV:String="all";
+			private var selectedDepartment:String="all";
+			private var selectedPosition:String="all";
+			private var selectedRegion:String="all";
+			private var selectedIpe:String="all";
+			private var tempAC:ArrayCollectionExtended;
+			private var tempYTD:Number;
+
+			[Bindable]
+			private var chartAC:ArrayCollection;
+			[Bindable]
+			private var chartTTRD:ArrayCollection;
+
+			[Bindable]
+			private var turnoverAC:ArrayCollection;
+
+			private var periodArr:Array;
+			private var keys:Object={};
+			private var totalEmployees:Number=50;
+			private var totalEmployeesLeft:Number;
+
+			[Bindable]
+			public var dpRows:ArrayCollectionExtended;
+
+			[Autowire(bean="controller")]
+			[Bindable]
+			public var controller:VestasController;
+
+			[Bindable]
+			public var breadCrumdCollection:ArrayCollection;
+
+			[Bindable]
+			public var functionArray:Array;
+			[Bindable]
+			public var positionArray:Array;
+
+
+			[Bindable]
+			public var corporateLevelArray:Array;
+
+			[Bindable]
+			public var careerTrackArray:Array;
+
+			[Bindable]
+			public var countryArray:Array;
+
+			[Bindable]
+			public var regionArray:Array;
+			[Bindable]
+			public var nationalityArray:Array;
+
+			[Bindable]
+			public var monthArray:ArrayCollection;
+
+			[Bindable]
+			public var genderArray:Array;
+			[Bindable]
+			public var sipArray:Array;
+
+			[Bindable]
+			public var sivArray:Array;
+
+
+			[Bindable]
+			public var educationArray:Array;
+
+			[Bindable]
+			private var isMonthly:Boolean=true;
+			[Bindable]
+			private var isYearly:Boolean=false;
+			[Bindable]
+			private var isQuarterly:Boolean=false;
+			[Bindable]
+			private var isHalfYearly:Boolean=false;
+			[Bindable]
+			private var isWeekly:Boolean=false;
+
+			[Bindable]
+			public var yearArray:ArrayCollection;
+			[Bindable]
+			public var quartelyArray:ArrayCollection;
+			[Bindable]
+			public var halfYearlyArray:ArrayCollection;
+			[Bindable]
+			public var weeklyArray:ArrayCollection;
+			
+			[Embed(source="/assets/pdf.png")]
+			[Bindable]
+			public var saveImg:Class;
+			
+
+			protected function radiogroup_changeHandler(event:Event):void
+			{
+				if (radiogroup.selection.id == 'monthly')
+				{
+					isYearly=false;
+					isMonthly=true;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=false;
+					/* yeraCB.selectedIndex=-1;
+					quaterCB.selectedIndex=-1;
+					halfYearlyCB.selectedIndex=-1;
+					weekCB.selectedIndex=-1; */
+				}
+				else if (radiogroup.selection.id == 'yearly')
+				{
+					isYearly=true;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=false;
+					/* quaterCB.selectedIndex=-1;
+					halfYearlyCB.selectedIndex=-1;
+					weekCB.selectedIndex=-1;
+					monthCB.selectedIndex=-1; */
+
+				}
+				else if (radiogroup.selection.id == 'quarterly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=true;
+					isHalfYearly=false;
+					isWeekly=false;
+
+					/* yeraCB.selectedIndex=-1;
+					halfYearlyCB.selectedIndex=-1;
+					weekCB.selectedIndex=-1;
+					monthCB.selectedIndex=-1; */
+
+				}
+				else if (radiogroup.selection.id == 'halfYearly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=true;
+					isWeekly=false;
+					/* yeraCB.selectedIndex=-1;
+					quaterCB.selectedIndex=-1;
+					weekCB.selectedIndex=-1;
+					monthCB.selectedIndex=-1; */
+
+				}
+				else if (radiogroup.selection.id == 'weekly')
+				{
+					isYearly=false;
+					isMonthly=false;
+					isQuarterly=false;
+					isHalfYearly=false;
+					isWeekly=true;
+					/* yeraCB.selectedIndex=-1;
+					quaterCB.selectedIndex=-1;
+					halfYearlyCB.selectedIndex=-1;
+					monthCB.selectedIndex=-1; */
+
+				}
+			}
+
+
+
+			public function init():void
+			{
+				dpRows=new ArrayCollectionExtended();
+				breadCrumdCollection=new ArrayCollection();
+				otherSelection();
+
+			}
+
+			private function onCollectionChange(event:CollectionEvent):void
+			{
+				if (ac != null)
+					dpRows=new ArrayCollectionExtended(ac.source);
+
+			}
+
+			private function filterByPeriod(item:Object):Boolean
+			{
+				if (item.period == selectedPeriod || selectedPeriod == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByGender(item:Object):Boolean
+			{
+				if (item.gender == selectedGender || selectedGender == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByCountry(item:Object):Boolean
+			{
+				if (item.countryOfEmployment == selectedCountry || selectedCountry == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByNationality(item:Object):Boolean
+			{
+				if (item.nationality == selectedNationality || selectedNationality == "all")
+					return true;
+				return false;
+			}
+
+			private function filterBySIP(item:Object):Boolean
+			{
+				if (item.seniorityPosition == selectedSIP || selectedSIP == "all")
+					return true;
+				return false;
+			}
+
+			private function filterBySIV(item:Object):Boolean
+			{
+				if (item.seniorityVestas == selectedSIV || selectedSIV == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByDepartment(item:Object):Boolean
+			{
+				if (item.department == selectedDepartment || selectedDepartment == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByPosition(item:Object):Boolean
+			{
+				if (item.position == selectedPosition || selectedPosition == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByRegion(item:Object):Boolean
+			{
+				if (item.region == selectedRegion || selectedRegion == "all")
+					return true;
+				return false;
+			}
+
+			private function filterMonth(item:Object):Boolean
+			{
+				if (item.period == selectedPeriod || selectedPeriod == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByIpe(item:Object):Boolean
+			{
+				if (selectedIpe == "all")
+				{
+					return true;
+				}
+				else if ((selectedIpe == "IPE 50-53") && (item.ipe == "IPE 50" || item.ipe == "IPE 51" || item.ipe == "IPE 52" || item.ipe == "IPE 53"))
+				{
+					return true;
+
+				}
+				else if ((selectedIpe == "IPE 54-56") && (item.ipe == "IPE 54" || item.ipe == "IPE 55" || item.ipe == "IPE 56"))
+				{
+					return true;
+
+				}
+				else if ((selectedIpe == "IPE 57-58") && (item.ipe == "IPE 57" || item.ipe == "IPE 58"))
+				{
+					return true;
+				}
+				else if ((selectedIpe == "IPE 59-61") && (item.ipe == "IPE 59" || item.ipe == "IPE 60" || item.ipe == "IPE 61"))
+				{
+					return true;
+				}
+
+				return false;
+			}
+
+			/* private function periodChangeHandler():void
+			{
+				if (educationCB.selectedItem != null)
+				{
+					selectedPeriod=educationCB.selectedItem.data;
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "period")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedPeriod != "all")
+					{
+						breadCrumdCollection.addItem({name: "education", title: "Education : " + selectedPeriod});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+ */
+			private function genderChangeHandler():void
+			{
+				if (genderCB.selectedItem != null)
+				{
+					selectedGender=genderCB.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "gender")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedGender != "all")
+					{
+						breadCrumdCollection.addItem({name: "gender", title: "Gender : " + selectedGender});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function countryChangeHandler():void
+			{
+				if (countryCB.selectedItem != null)
+				{
+					selectedCountry=countryCB.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "country")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedCountry != "all")
+					{
+						breadCrumdCollection.addItem({name: "country", title: "Country : " + selectedCountry});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function nationalityChangeHandler():void
+			{
+				if (nationalityCB.selectedItem != null)
+				{
+					selectedNationality=nationalityCB.selectedItem.data;
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "nationality")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedNationality != "all")
+					{
+						breadCrumdCollection.addItem({name: "nationality", title: "Nationality : " + selectedNationality});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function sipChangeHandler():void
+			{
+				if (sipCB.selectedItem != null)
+				{
+					selectedSIP=sipCB.selectedItem.data;
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "sip")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedSIP != "all")
+					{
+						breadCrumdCollection.addItem({name: "sip", title: "SIP : " + selectedSIP});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function sivChangeHandler():void
+			{
+				if (sivCB.selectedItem != null)
+				{
+					selectedSIV=sivCB.selectedItem.data;
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "siv")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedSIV != "all")
+					{
+						breadCrumdCollection.addItem({name: "siv", title: "SIV : " + selectedSIV});
+					}
+					otherSelection();
+					generateFilter();
+
+				}
+			}
+
+			private function functionChangeHandler():void
+			{
+				if (functionCB.selectedItem != null)
+				{
+					selectedDepartment=functionCB.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "function")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedDepartment != "all")
+					{
+						breadCrumdCollection.addItem({name: "function", title: "Function : " + selectedDepartment});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function positionChangeHandler():void
+			{
+				if (positionCB.selectedItem != null)
+				{
+					selectedPosition=positionCB.selectedItem.data;
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "position")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedPosition != "all")
+					{
+						breadCrumdCollection.addItem({name: "position", title: "Position : " + selectedPosition});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function regionChangeHandler():void
+			{
+				if (regionCB.selectedItem != null)
+				{
+					selectedRegion=regionCB.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "region")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedRegion != "all")
+					{
+						breadCrumdCollection.addItem({name: "region", title: "Region : " + selectedRegion});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function ipeChangeHandler():void
+			{
+				if (ipeCB.selectedItem != null)
+				{
+					selectedIpe=ipeCB.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "ipe")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedIpe != "all")
+					{
+						breadCrumdCollection.addItem({name: "ipe", title: "Corporate Level : " + selectedIpe});
+					}
+					otherSelection();
+					generateFilter();
+				}
+			}
+
+			private function monthChangeHandler(event:Event):void
+			{
+				var dropDown:DropDownList=event.currentTarget as DropDownList;
+
+				if (dropDown.selectedItem != null)
+				{
+					selectedPeriod=dropDown.selectedItem.data;
+
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "period")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+					if (selectedPeriod != "all")
+					{
+						breadCrumdCollection.addItem({name: "period", title: "Period : " + selectedPeriod});
+					}
+					otherSelection();
+					generateFilter();
+				}
+
+
+			}
+
+			private function otherSelection():void
+			{
+				if (breadCrumdCollection.length == 0)
+				{
+					breadCrumdCollection.addItem({name: "default", title: "Default : All"});
+
+				}
+				else
+				{
+					var index:int=0;
+					for each (var obj:* in breadCrumdCollection)
+					{
+
+						if (obj['name'] == "default")
+						{
+							breadCrumdCollection.removeItemAt(index);
+						}
+						index++;
+					}
+				}
+
+			}
+
+			private function generateFilter():void
+			{
+				dpRows.filterFunctions=[filterByPeriod, filterByGender, filterByCountry, filterByNationality, filterBySIP, filterBySIV, filterByDepartment, filterByPosition, filterByRegion, filterByIpe, filterMonth];
+				dpRows.refresh();
+				tempAC=dpRows;
+				modifyChart(tempAC);
+			}
+
+			private function chartChangeHandler():void
+			{
+				myViewStack.selectedChild=chartType.selectedItem as INavigatorContent;
+			}
+
+			private function modifyChart(tempArr:ArrayCollection):void
+			{
+
+				periodArr=new Array();
+				//mx.controls.Alert.show("inside the j loop");
+				for (var i:int=0; i < tempArr.length; i++)
+				{
+					if (periodArr.length == 0)
+					{
+						periodArr.push(tempArr[i].period);
+							//myTxt.text = tempArr[i].period;
+
+					}
+					else if (periodArr.indexOf(tempArr[i].period) == -1)
+					{
+						periodArr.push(tempArr[i].period);
+							//myTxt.text += "--"+tempArr[i].period;
+
+					}
+				}
+				;
+				processChart(tempArr, periodArr);
+			}
+
+			public function processChart(tA:ArrayCollection, pA:Array):void
+			{
+				totalEmployeesLeft=tA.length;
+				totalEmployees=tA.length;
+				tempYTD=0;
+				chartAC=new ArrayCollection();
+				chartTTRD=new ArrayCollection();
+				turnoverAC=new ArrayCollection();
+				var tempCount:Number=0;
+				//mx.controls.Alert.show("inside the k loop");
+				for (var k:int=0; k < pA.length; k++)
+				{
+					//mx.controls.Alert.show("inside the l loop");
+					var tempPeriod:String="";
+					var tempOwn:Number=0;
+					var tempVestas:Number=0;
+					var tempBU:Number=0;
+					for (var j:int=0; j < tA.length; j++)
+					{
+						if (pA[k] == tA[j].period)
+						{
+							if (tA[j].ownTermination != 0)
+							{
+								tempOwn++;
+							}
+							else if (tA[j].vestasTermination != 0)
+							{
+								tempVestas++;
+							}
+							else if (tA[j].buTransfer != 0)
+							{
+								tempBU++
+							}
+						}
+						tempPeriod=pA[k];
+					}
+					var tt:Number=((tempOwn / totalEmployees) * 100) + ((tempVestas / totalEmployees) * 100);
+					tempYTD+=tt;
+					var tempAnnualizedTrend:String=numberFormatter.format(new String((tempYTD / ((k + 1) * 12))));
+
+					chartAC.addItem({period: tempPeriod, own: tempOwn, vestas: tempVestas, other: tempBU});
+					chartTTRD.addItem({period: tempPeriod, own: numberFormatter.format(new String(((tempOwn / totalEmployees) * 100))), vestas: numberFormatter.format(new String(((tempVestas / totalEmployees) * 100))), tarT: 8.5, ytd: numberFormatter.format(new String(tempYTD)), annualizedTrend: tempAnnualizedTrend});
+					turnoverAC.addItem({period: tempPeriod, turnover: tt, actual2010: 9.5, tarT: 8.5});
+				}
+				//mx.controls.Alert.show("---"+chartAC.length as String);
+				myChart.dataProvider=chartAC;
+				myAxis.dataProvider=chartAC;
+			}
+
+			public function changeEvt(event:Event):void
+			{
+
+			}
+
+			private function labelFormatter(categoryItem:Object, previousValue:Object, axis:IAxis):String
+			{
+				return categoryItem + "%";
+			}
+
+			private function dataTipFormatter(hd:HitData):String
+			{
+				var s:String;
+				s="<B>" + ColumnSeries(hd.element).displayName + "</B>\n";
+				s+="Period -" + hd.item['period'] + "\n";
+				s+="Lateral - " + hd.item['lateral'] + "\n";
+				s+="Promotion - " + hd.item['promotion'] + "\n";
+				s+="New Vestas - " + hd.item['newVestas'] + "\n";
+
+				return s;
+			}
+			
+			private function generatePDF(grid:mx.controls.DataGrid,chart:ColumnChart):void{
+				
+			//	CreatePDF.generatePDF(grid,chart);
+				CreatePDF.generatePDFTest(search as UIComponent);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2"/>
+		<s:RadioButtonGroup id="radiogroup"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</s:layout>
+	<s:BorderContainer id="chartScr" x="0" y="0" width="100%" height="100%" backgroundAlpha="0"
+					   borderVisible="false" horizontalCenter="0">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+
+		<mx:HBox width="100%">
+			<mx:VBox width="250" backgroundAlpha=".3" backgroundColor="0xFFFFFF"
+					 borderColor="#5D8AA8" borderStyle="outset" cornerRadius="7" paddingBottom="5"
+					 paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:VGroup verticalAlign="middle">
+					<s:Label color="0x000000" text="Chart Type:"/>
+					<mx:ComboBox id="chartType" change="chartChangeHandler()"
+								 dataProvider="{myViewStack}"/>
+				</s:VGroup>
+				<!--<mx:HRule width="100%"
+						  height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label text="Education:"
+							 width="110"
+							 color="0x000000"/>
+					<s:DropDownList id="educationCB"
+									selectedIndex="0"
+									dataProvider="{educationArray}"
+									change="periodChangeHandler()">
+					</s:DropDownList>
+				</s:VGroup>-->
+				<mx:HRule width="100%" height="1"/>
+				
+				<s:VGroup verticalAlign="middle">
+					<s:Label color="0x000000" text="Period:"/>
+					<s:DropDownList id="monthCB" change="monthChangeHandler(event)"
+									dataProvider="{monthArray}" enabled="{isMonthly}"
+									selectedIndex="10"/>
+				</s:VGroup>
+				
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Gender:"/>
+					<mx:ComboBox id="genderCB" change="genderChangeHandler()"
+								 dataProvider="{genderArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label color="0x000000" text="Seniority in Position:"/>
+					<mx:ComboBox id="sipCB" change="sipChangeHandler()" dataProvider="{sipArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Seniority in Vestas:"/>
+					<mx:ComboBox id="sivCB" change="sivChangeHandler()" dataProvider="{sivArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Region:"/>
+					<mx:ComboBox id="regionCB" change="regionChangeHandler()"
+								 dataProvider="{regionArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Nationality:"/>
+					<mx:ComboBox id="nationalityCB" change="nationalityChangeHandler()"
+								 dataProvider="{nationalityArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Country:"/>
+					<mx:ComboBox id="countryCB" change="countryChangeHandler()"
+								 dataProvider="{countryArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Function:"/>
+					<mx:ComboBox id="functionCB" change="functionChangeHandler()"
+								 dataProvider="{functionArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Position:"/>
+					<mx:ComboBox id="positionCB" width="230" change="positionChangeHandler()"
+								 dataProvider="{positionArray}">
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Corporate Level:"/>
+					<mx:ComboBox id="ipeCB" change="ipeChangeHandler()"
+								 dataProvider="{corporateLevelArray}">
+
+					</mx:ComboBox>
+				</s:VGroup>
+			</mx:VBox>
+			<mx:VBox width="100%" height="100%" borderColor="#5D8AA8" borderStyle="outset">
+				<!--<utils:TimeSpanCriteria fontSize="8"
+										backgroundAlpha="0"
+										borderStyle="none"
+										width="100%"/>-->
+				<!--
+				<s:HGroup width="100%">
+
+					<s:RadioButton id="monthly"
+								   selected="true"
+								   label="Month"
+								   groupName="radiogroup"
+								   focusColor="#FFFFFF"/>
+					<s:DropDownList enabled="{isMonthly}"
+									id="monthCB"
+									selectedIndex="0"
+									change="monthChangeHandler(event)"
+									dataProvider="{monthArray}"/>
+					<s:RadioButton id="yearly"
+								   label="Year"
+								   groupName="radiogroup"
+								   focusColor="#FFFFFF"/>
+					<s:DropDownList enabled="{isYearly}"
+									id="yeraCB"
+									selectedIndex="0"
+									change="monthChangeHandler(event)"
+									dataProvider="{yearArray }"/>
+					<s:RadioButton id="quarterly"
+								   label="Quarter"
+								   groupName="radiogroup"
+								   focusColor="#FFFFFF"/>
+					<s:DropDownList enabled="{isQuarterly}"
+									id="quaterCB"
+									selectedIndex="0"
+									change="monthChangeHandler(event)"
+									dataProvider="{quartelyArray}"/>
+					<s:RadioButton id="halfYearly"
+								   label="Half-Yearly"
+								   groupName="radiogroup"
+								   focusColor="#FFFFFF"/>
+					<s:DropDownList enabled="{isHalfYearly}"
+									id="halfYearlyCB"
+									change="monthChangeHandler(event)"
+									dataProvider="{halfYearlyArray}"/>
+					<s:RadioButton id="weekly"
+								   label="Weekly"
+								   focusColor="#FFFFFF"
+								   groupName="radiogroup"/>
+					<s:DropDownList enabled="{isWeekly}"
+									id="weekCB"
+									change="monthChangeHandler(event)"
+									dataProvider="{weeklyArray}"/>
+				</s:HGroup>
+				-->
+				<mx:LinkBar id="breadCrumb" width="100%" backgroundAlpha="0" borderStyle="none"
+							cornerRadius="5" dataProvider="{breadCrumdCollection}" fontSize="11"
+							horizontalAlign="left" labelField="title"
+							toolTip="Description to be given by Vestas"/>
+				<!-- Define the ViewStack and the three child containers -->
+				<mx:ViewStack id="myViewStack" width="100%" height="100%" backgroundColor="0xFFFFFF"
+							  borderStyle="none" paddingBottom="10" paddingLeft="10"
+							  paddingRight="10" paddingTop="10">
+
+					<s:NavigatorContent id="search" label="Employees leaving Technology R&amp;D"
+										backgroundColor="0xFFFFFF" fontWeight="bold">
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="left"/>
+						</s:layout>
+
+						<mx:ColumnChart id="myChart" width="100%" height="330" columnWidthRatio=".2"
+										creationComplete="generateFilter()" showDataTips="true"
+										type="stacked">
+							<mx:horizontalAxis>
+								<mx:CategoryAxis id="myAxis" categoryField="period"/>
+							</mx:horizontalAxis>
+							<mx:series>
+								<mx:ColumnSeries columnWidthRatio=".2"
+												 displayName="Vestas Termination"
+												 showDataEffect="{chartChange}" xField="period"
+												 yField="vestas">
+									<mx:fill>
+										<mx:SolidColor color="{0xD4AF37}"/>
+									</mx:fill>
+								</mx:ColumnSeries>
+								<mx:ColumnSeries columnWidthRatio=".2" displayName="Own Termination"
+												 showDataEffect="{chartChange}" xField="period"
+												 yField="own">
+									<mx:fill>
+										<mx:SolidColor color="{0xA8E4A0}"/>
+									</mx:fill>
+								</mx:ColumnSeries>
+								<mx:ColumnSeries columnWidthRatio=".2"
+												 displayName="Transferred to other BU"
+												 showDataEffect="{chartChange}" xField="period"
+												 yField="other">
+									<mx:fill>
+										<mx:SolidColor color="{0x7F8DA9}"/>
+									</mx:fill>
+								</mx:ColumnSeries>
+							</mx:series>
+						</mx:ColumnChart>
+						<s:HGroup>
+							<mx:Legend height="20" dataProvider="{myChart}" direction="horizontal"/>
+							<mx:Spacer width="400"/>
+							<mx:Image buttonMode="true" click="generatePDF(grid,myChart)"
+									  source="{saveImg}" useHandCursor="true"/>
+						</s:HGroup>
+						
+						<mx:DataGrid id="grid" width="100%" height="85" dataProvider="{chartAC}"
+									 fontSize="10" rowHeight="19" sortableColumns="false">
+							<mx:columns>
+								<mx:DataGridColumn dataField="period" headerText="Month &amp; Year"/>
+								<mx:DataGridColumn dataField="own" headerText="Own Termination"/>
+								<mx:DataGridColumn dataField="vestas" headerText="Vestas Termination"/>
+								<mx:DataGridColumn dataField="other"
+												   headerText="Transferred to other BU"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</s:NavigatorContent>
+
+					<s:NavigatorContent id="custInfo" width="100%" height="100%"
+										label="Turnover - Technology R&amp;D">
+
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="left"/>
+						</s:layout>
+
+						<mx:ColumnChart id="myChart2" width="100%" height="330" columnWidthRatio=".2"
+										creationComplete="generateFilter()"
+										dataProvider="{chartTTRD}" showDataTips="true">
+							<mx:horizontalAxis>
+								<mx:CategoryAxis categoryField="period" dataProvider="{chartTTRD}"/>
+							</mx:horizontalAxis>
+							<mx:verticalAxis>
+								<mx:LinearAxis labelFunction="labelFormatter"/>
+							</mx:verticalAxis>
+							<mx:series>
+								<mx:ColumnSet type="stacked">
+									<mx:ColumnSeries displayName="Vestas Termination"
+													 showDataEffect="{chartChange}" xField="period"
+													 yField="vestas">
+										<mx:fill>
+											<mx:SolidColor color="{0xD4AF37}"/>
+										</mx:fill>
+									</mx:ColumnSeries>
+									<mx:ColumnSeries displayName="Own Termination"
+													 showDataEffect="{chartChange}" xField="period"
+													 yField="own">
+										<mx:fill>
+											<mx:SolidColor color="{0xA8E4A0}"/>
+										</mx:fill>
+									</mx:ColumnSeries>
+								</mx:ColumnSet>
+								<mx:LineSeries displayName="Target" showDataEffect="{chartChange}"
+											   xField="period" yField="tarT">
+									<mx:fill>
+										<mx:SolidColor color="{0x7F8DA9}"/>
+									</mx:fill>
+								</mx:LineSeries>
+								<mx:LineSeries displayName="YTD" showDataEffect="{chartChange}"
+											   xField="period" yField="ytd">
+									<mx:fill>
+										<mx:SolidColor color="{0x7F8DA9}"/>
+									</mx:fill>
+								</mx:LineSeries>
+								<mx:LineSeries displayName="Annualized Trend"
+											   showDataEffect="{chartChange}" xField="period"
+											   yField="annualizedTrend">
+									<mx:fill>
+										<mx:SolidColor color="{0x7F8DA9}"/>
+									</mx:fill>
+								</mx:LineSeries>
+							</mx:series>
+
+						</mx:ColumnChart>
+						<s:HGroup>
+							<mx:Legend height="20" dataProvider="{myChart2}" direction="horizontal"/>
+							<mx:Spacer width="50"/>
+							<mx:Image buttonMode="true" click="generatePDF(grid2,myChart2)"
+									  source="{saveImg}" useHandCursor="true"/>
+						</s:HGroup>
+						
+						<mx:DataGrid id="grid2" width="100%" height="85" dataProvider="{chartTTRD}"
+									 fontSize="10" rowHeight="19" sortableColumns="false">
+							<mx:columns>
+								<mx:DataGridColumn width="85" dataField="period"
+												   headerText="Month &amp; Year"/>
+								<mx:DataGridColumn dataField="own" headerText="Own Termination (%)"/>
+								<mx:DataGridColumn width="142" dataField="vestas"
+												   headerText="Vestas Termination (%)"/>
+								<mx:DataGridColumn width="70" dataField="tarT"
+												   headerText="Target (%)"/>
+								<mx:DataGridColumn width="57" dataField="ytd" headerText="YTD (%)"/>
+								<mx:DataGridColumn width="128" dataField="annualizedTrend"
+												   headerText="Annualized Trend (%)"/>
+							</mx:columns>
+						</mx:DataGrid>
+
+					</s:NavigatorContent>
+
+					<s:NavigatorContent id="accountInfo" width="100%" height="100%"
+										label="Turnover 2011/2010">
+
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="left"/>
+						</s:layout>
+
+						<mx:ColumnChart id="myChart1" width="100%" height="330" columnWidthRatio=".2"
+										creationComplete="changeEvt(event)"
+										dataProvider="{turnoverAC}" showDataTips="true">
+							<mx:horizontalAxis>
+								<mx:CategoryAxis categoryField="period" dataProvider="{turnoverAC}"/>
+							</mx:horizontalAxis>
+							<mx:series>
+								<mx:ColumnSeries displayName="Technology R&amp;D 2011"
+												 showDataEffect="{chartChange}" xField="period"
+												 yField="turnover">
+									<mx:fill>
+										<mx:SolidColor color="{0xD4AF37}"/>
+									</mx:fill>
+								</mx:ColumnSeries>
+								<mx:ColumnSeries displayName="Actual 2010"
+												 showDataEffect="{chartChange}" xField="period"
+												 yField="actual2010">
+									<mx:fill>
+										<mx:SolidColor color="{0xA8E4A0}"/>
+									</mx:fill>
+								</mx:ColumnSeries>
+								<mx:LineSeries displayName="Target" showDataEffect="{chartChange}"
+											   xField="period" yField="tarT">
+									<mx:fill>
+										<mx:SolidColor color="{0x7F8DA9}"/>
+									</mx:fill>
+								</mx:LineSeries>
+							</mx:series>
+						</mx:ColumnChart>
+						
+						<s:HGroup>
+							<mx:Legend height="20" dataProvider="{myChart1}" direction="horizontal"/>
+							<mx:Spacer width="50"/>
+							<mx:Image buttonMode="true" click="generatePDF(grid1,myChart1)"
+									  source="{saveImg}" useHandCursor="true"/>
+						</s:HGroup>
+						
+						<mx:DataGrid id="grid1" width="100%" height="85" dataProvider="{turnoverAC}"
+									 fontSize="10" rowHeight="19" sortableColumns="false">
+							<mx:columns>
+								<mx:DataGridColumn dataField="period" headerText="Month &amp; Year"/>
+								<mx:DataGridColumn dataField="turnover"
+												   headerText="Technology R&amp;D 2011 (%)"/>
+								<mx:DataGridColumn dataField="actual2010"
+												   headerText="Actual 2010 (%)"/>
+								<mx:DataGridColumn dataField="tarT" headerText="Target (%)"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</s:NavigatorContent>
+
+				</mx:ViewStack>
+			</mx:VBox>
+		</mx:HBox>
+	</s:BorderContainer>
+</s:NavigatorContent>

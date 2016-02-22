@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				autoDrawBackground="false">
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+		<s:State name="selected" />
+		<!--
+		<s:State name="normalAndCaret" />
+		<s:State name="normalAndShowsCaret" />
+		<s:State name="hoveredAndCaret" />
+		<s:State name="hoveredAndShowsCaret" />
+		<s:State name="selectedAndCaret" />
+		<s:State name="selectedAndShowsCaret" />-->
+	</s:states>
+
+	<s:Graphic width="100%" height="100%" left="0" right="0" top="0" bottom="0" x="0" y="0">
+		<s:Rect left="0" right="0" top="0" bottom="0" width="5" height="5">
+			<s:fill>
+				<s:LinearGradient rotation="-90">
+					<s:GradientEntry
+						color.normal="#5c5c5c"
+						color.hovered="#5c5c5c"
+						color.selected="#5c5c5c"
+						ratio="0"/>
+					<s:GradientEntry
+						color.normal="#bcbdbe" 
+						color.hovered="#bcbdbe"
+						color.selected="#bcbdbe"
+						ratio="0.110565"/>
+					<s:GradientEntry
+						color.normal="#ffffff" 
+						color.hovered="#602C29"
+						color.selected="#602C29"
+						ratio="0.454545"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+	</s:Graphic>
+	
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:RichText id="labelDisplay"
+					text="{data}"
+					textAlign="left"
+					styleName="listItem"
+					verticalAlign="middle"
+					lineBreak="toFit"
+					paddingTop="10"
+					paddingBottom="10"
+					color.hovered ="0xffffff"
+					color.selected="0xffffff"
+					paddingLeft="10"
+					paddingRight="10"
+					horizontalCenter="0" verticalCenter="1">
+		</s:RichText>
+		
+		<mx:Spacer width="100%" />
+		<s:CheckBox id="checkbox" />
+	</s:HGroup>
+	
+</s:ItemRenderer>

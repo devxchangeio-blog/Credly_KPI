@@ -1,0 +1,37 @@
+<project name="Flex Ant Tasks Build Script" default="compile flex project">
+
+	<!-- load previously defined configuration properties file -->
+	<property file="build.properties" />
+
+	<!-- points to our flexTasks.jar we copied to the libs folder to distribute with the project -->
+	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
+
+	<!-- delete and recreate the DEPLOY dir -->
+	<target name="init">
+		<!--delete dir="${DEPLOY_DIR}" /-->
+		<mkdir dir="${DEPLOY_DIR}" />
+	</target>
+
+	<!-- Build and output the Main.swf-->
+	<target name="compile flex project" depends="init">
+		<mxmlc file="${SRC_DIR}/index.mxml" output="C:/workspace/Vestas-Server/WebContent/index.swf" services="${basedir}/services-config.xml">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+			<!--<compiler.include-libraries append="true" dir="${FLEX_HOME}/frameworks/libs">
+				<include name="advancedgrids.swc"/>
+				<include name="framework.swc"/>
+				<include name="rpc.swc"/>
+				<include name="spark.swc"/>
+				<include name="charts.swc"/>
+				<include name="core.swc"/>
+				<include name="sparkskins.swc"/>
+				<include name="spark_dmv.swc"/>
+			</compiler.include-libraries>-->
+			<compiler.include-libraries append="true" dir="${basedir}/libs">
+				<include name="swiz4.swc" />
+				<include name="AlivePDF.swc" />
+			</compiler.include-libraries>
+		</mxmlc>
+	</target>
+
+</project>

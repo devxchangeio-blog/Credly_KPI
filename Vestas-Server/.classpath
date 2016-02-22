@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="G:/Data/jars/ibatis-2.3.4.726.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/ibatis-common-2.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/ibatis-dao-2.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/ibatis-sqlmap-2.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/mysql-connector-java-3.1.13-bin.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-aop-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-beans-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-context-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-context-support-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-core-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-flex-1.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-integration-core-1.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-jdbc-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-jms-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-orm-2.5.6.jar" sourcepath="C:/Users/Karthy/.m2/repository/org/springframework/spring-orm/2.5.6/spring-orm-2.5.6-sources.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-security-core-2.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-security-core-tiger-2.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-tx-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-web-2.5.6.SEC01.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/spring-webmvc-2.5.6.SEC01.jar" sourcepath="C:/Users/Karthy/.m2/repository/org/springframework/spring-webmvc/2.5.6.SEC01/spring-webmvc-2.5.6.SEC01-sources.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/sqljdbc.jar"/>
+	<classpathentry kind="lib" path="G:/Data/jars/standard-1.1.2.jar"/>
+	<classpathentry kind="lib" path="G:/Software/apache-tomcat-6.0.32/lib/commons-digester3-3.2.jar"/>
+	<classpathentry kind="lib" path="G:/Software/apache-tomcat-6.0.32/lib/poi-3.8-beta5-20111217.jar"/>
+	<classpathentry kind="lib" path="G:/Software/apache-tomcat-6.0.32/lib/servlet-api.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

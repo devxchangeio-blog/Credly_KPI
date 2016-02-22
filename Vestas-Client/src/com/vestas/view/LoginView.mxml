@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" show="onShow()"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.vestas.bean.Beans;
+			import com.vestas.controller.VestasController;
+			import com.vestas.model.EmployeeDetails;
+			import com.vestas.model.UserParams;
+			
+			import mx.collections.ArrayCollection;
+			
+			
+			[Autowire(bean="controller")]
+			public var controller:VestasController;
+			
+			[Embed(source="/assets/pic1.jpg")]
+			[Bindable]
+			public var img1:Class;
+			
+			[Embed(source="/assets/pic2.jpg")]
+			[Bindable]
+			public var img2:Class;
+			
+			private function onShow():void{
+				username.text="";
+				password.text="";
+			}
+			private function checkLogin():void
+			{  
+				
+					var params:UserParams=new UserParams();
+					params.username=username.text;
+					params.password=password.text;
+					controller.loginValidation(params);
+			}
+			
+			 private function onKeyUp(evt:KeyboardEvent):void
+			{
+				if(evt.keyCode == 13 && username.text.toLowerCase() != "" && password.text.toLowerCase() != "")
+				{
+					checkLogin();
+				}
+				
+			} 
+			
+		]]>
+	</fx:Script>
+	
+	
+	<mx:HBox id="loginScr"  borderColor="#5D8AA8" borderStyle="outset" horizontalCenter="0" verticalCenter="-2">
+		<mx:Image source="{img1}"  />
+		<mx:Panel resizeEffect="Resize" width="250" height="200" x="450" y="100" layout="absolute" title="HR Portal Login" horizontalCenter="0" dropShadowVisible="false" verticalCenter="-2" id="panel1">
+			<mx:Label x="10" y="10" text="Username:" id="label1"/>
+			<mx:TextInput x="10" y="36" id="username" focusEnabled="true" text=""/>
+			<mx:Label x="10" y="66" text="Password:" id="label2"/>
+			<mx:TextInput x="10" y="92" id="password" displayAsPassword="true" focusEnabled="true" text=""/>
+			<mx:Button x="10" y="122" label="Submit" id="Submit" click="checkLogin()" focusEnabled="true"/>
+		</mx:Panel>
+		<mx:Image source="{img2}" />		
+	</mx:HBox>
+</s:NavigatorContent>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:flex="http://www.springframework.org/schema/flex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+						http://www.springframework.org/schema/security
+						http://www.springframework.org/schema/security/spring-security-2.0.4.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-2.5.xsd
+						http://www.springframework.org/schema/flex
+				        http://www.springframework.org/schema/flex/spring-flex-1.0.xsd">
+
+	<flex:message-broker />
+	<!-- Expose the ProductService bean for BlazeDS remoting -->
+	<flex:remoting-destination ref="remoteInterface" />
+
+	<bean id="remoteInterface" class="com.vestas.remote.VestasRemoteInterfaceImpl">
+		<property name="lookupService" ref="lookupService" />
+	</bean>
+
+	<bean id="lookupService" class="com.vestas.service.LookupServiceImpl">
+		<property name="usersDao" ref="usersDao" />
+	</bean>
+
+	<bean id="usersDao" class="com.vestas.daoImpl.UsersDaoImpl">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<property name="sqlMapClient">
+			<ref local="sqlMapClient" />
+		</property>
+	</bean>
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/buzzlan_vestas" />
+		<property name="username" value="buzzlan_demo" />
+		<property name="password" value="vestas" />
+	</bean>
+	<!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" 
+		/> <property name="url" value="jdbc:sqlserver://localhost:1433;databaseName=vestas" 
+		/> <property name="username" value="sa" /> <property name="password" value="123" 
+		/> </bean> -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="classpath:com/vestas/sqlmap/SqlMapConfig.xml" />
+	</bean>
+
+	<bean id="ExcelView" class="com.vestas.view.ExcelView">
+	</bean>
+
+	<bean
+		class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping" />
+
+	<bean class="com.vestas.controller.ExportController" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+		<property name="order" value="1" />
+	</bean>
+
+</beans>

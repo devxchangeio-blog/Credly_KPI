@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					width="100%" height="100%"
+					initialize="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:SeriesInterpolate id="chartChange" duration="1000"/>
+		<s:ArrayCollection id="ac" collectionChange="onCollectionChange(event)"
+						   source="{controller.injuriesDetails.source}"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.vestas.controller.VestasController;
+			import com.vestas.servlet.CreatePDF;
+			import com.vestas.utils.ArrayCollectionExtended;
+			
+			import mx.charts.HitData;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.INavigatorContent;
+			import mx.events.CollectionEvent;
+			import mx.events.ItemClickEvent;
+			import mx.formatters.Formatter;
+			import mx.graphics.ImageSnapshot;
+			import mx.graphics.codec.PNGEncoder;
+
+
+			private var selectedPeriod:String="all";
+			private var selectedCountry:String="all";
+			private var selectedNationality:String="all";
+			private var selectedJob:String="all";
+			private var selectedSH:String="all";
+			private var selectedDepartment:String="all";
+			private var selectedPosition:String="all";
+			private var selectedRegion:String="all";
+			private var selectedIpe:String="all";
+			private var tempAC:ArrayCollectionExtended;
+			private var tempYTD:Number;
+
+			[Bindable]
+			private var chartAC:ArrayCollection;
+			[Bindable]
+			private var chartTTRD:ArrayCollection;
+
+			[Bindable]
+			private var turnoverAC:ArrayCollection;
+
+			private var periodArr:Array;
+			private var keys:Object={};
+			private var totalEmployees:Number=50;
+			private var totalEmployeesLeft:Number;
+
+			[Bindable]
+			public var dpRows:ArrayCollectionExtended;
+
+			[Bindable]
+			public var breadCrumdCollection:ArrayCollection;
+
+			[Autowire(bean="controller")]
+			[Bindable]
+			public var controller:VestasController;
+
+			public var closeIcon:Class;
+			
+			[Embed(source="/assets/save.gif")]
+			[Bindable]
+			public var saveImg:Class;
+			
+
+			public function init():void
+			{
+				dpRows=new ArrayCollectionExtended();
+				breadCrumdCollection=new ArrayCollection();
+
+			}
+
+			private function onCollectionChange(event:CollectionEvent):void
+			{
+				if (ac != null)
+					dpRows=new ArrayCollectionExtended(ac.source);
+
+			}
+
+			private function filterByPeriod(item:Object):Boolean
+			{
+				if (item.period == selectedPeriod || selectedPeriod == "all")
+					return true;
+				return false;
+			}
+
+
+			private function filterByCountry(item:Object):Boolean
+			{
+				if (item.countryOfEmployment == selectedCountry || selectedCountry == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByNationality(item:Object):Boolean
+			{
+				if (item.nationality == selectedNationality || selectedNationality == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByDepartment(item:Object):Boolean
+			{
+				if (item['function'] == selectedDepartment || selectedDepartment == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByPosition(item:Object):Boolean
+			{
+				if (item.position == selectedPosition || selectedPosition == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByRegion(item:Object):Boolean
+			{
+				if (item.region == selectedRegion || selectedRegion == "all")
+					return true;
+				return false;
+			}
+
+			private function filterByIpe(item:Object):Boolean
+			{
+				if (item.ipe == selectedIpe || selectedIpe == "all")
+					return true;
+				return false;
+			}
+
+			private function periodChangeHandler():void
+			{
+				if (periodCB.selectedItem != null)
+					selectedPeriod=periodCB.selectedItem.data;
+				//breadCrumdCollection.addItem({name: "period", title: selectedPeriod});
+				generateFilter();
+			}
+
+
+			private function countryChangeHandler():void
+			{
+				if (countryCB.selectedItem != null)
+					selectedCountry=countryCB.selectedItem.data;
+				//breadCrumdCollection.addItem({name: "country", title: selectedCountry});
+				generateFilter();
+			}
+
+			private function functionChangeHandler():void
+			{
+				if (functionCB.selectedItem != null)
+					selectedDepartment=functionCB.selectedItem.data;
+				//breadCrumdCollection.addItem({name: "function", title: selectedDepartment});
+				generateFilter();
+			}
+
+			private function positionChangeHandler():void
+			{
+				if (positionCB.selectedItem != null)
+					selectedPosition=positionCB.selectedItem.data;
+				//breadCrumdCollection.addItem({name: "position", title: selectedPosition});
+				generateFilter();
+			}
+
+			private function regionChangeHandler():void
+			{
+				if (regionCB.selectedItem != null)
+					selectedRegion=regionCB.selectedItem.data;
+				//breadCrumdCollection.addItem({name: "region", title: selectedRegion});
+				generateFilter();
+			}
+
+			private function ipeChangeHandler():void
+			{
+				if (ipeCB.selectedItem != null)
+					selectedIpe=ipeCB.selectedItem.data;
+				//breadCrumdCollection.addItem(selectedIpe);
+				generateFilter();
+			}
+
+			private function jobChangeHandler():void
+			{
+
+				if (jobCB.selectedItem != null)
+					selectedJob=jobCB.selectedItem.data;
+				generateFilter();
+
+
+			}
+
+			private function shChangeHandler():void
+			{
+				if (shCB.selectedItem != null)
+					selectedSH=shCB.selectedItem.data;
+				generateFilter();
+			}
+
+			private function generateFilter():void
+			{
+				dpRows.filterFunctions=[filterByPeriod, filterByCountry, filterByNationality, filterByDepartment, filterByPosition, filterByRegion, filterByIpe];
+				dpRows.refresh();
+				tempAC=dpRows;
+				modifyChart(tempAC);
+			}
+
+			private function chartChangeHandler():void
+			{
+				myViewStack.selectedChild=chartType.selectedItem as INavigatorContent;
+			}
+
+			private function modifyChart(tempArr:ArrayCollection):void
+			{
+
+				periodArr=new Array();
+				for (var i:int=0; i < tempArr.length; i++)
+				{
+					if (periodArr.length == 0)
+					{
+						periodArr.push(tempArr[i].period);
+
+					}
+					else if (periodArr.indexOf(tempArr[i].period) == -1)
+					{
+						periodArr.push(tempArr[i].period);
+
+					}
+				}
+				;
+				processChart(tempArr, periodArr);
+			}
+
+			public function processChart(tA:ArrayCollection, pA:Array):void
+			{
+				totalEmployeesLeft=tA.length;
+				tempYTD=0;
+				chartAC=new ArrayCollection();
+
+				var tempCount:Number=0;
+				for (var k:int=0; k < pA.length; k++)
+				{
+					var tempPeriod:String="";
+					var tempNoOfRepotableInjuries:Number;
+					var tempInjuriesYTD:Number=0;
+					var tempTotalWorkingHrsYTD:Number=0;
+					var tempTechRND:Number=0;
+					var tempYTD:Number=0;
+					var tempTotalWorkingHours:Number=0;
+					for (var j:int=0; j < tA.length; j++)
+					{
+						if (pA[k] == tA[j].period)
+						{
+							if (tA[j].noOfRepotableInjuries)
+							{
+								tempNoOfRepotableInjuries=tA[j].noOfRepotableInjuries;
+								tempInjuriesYTD+=tempNoOfRepotableInjuries;
+							}
+							if (tA[j].totalWorkingHours)
+							{
+								tempTotalWorkingHours=tA[j].totalWorkingHours;
+								tempTotalWorkingHrsYTD+=tempTotalWorkingHours;
+							}
+
+
+
+						}
+						tempPeriod=pA[k];
+						tempTechRND=((tempNoOfRepotableInjuries / tempTotalWorkingHours) * 1000000);
+
+					}
+
+					tempYTD=((tempInjuriesYTD / tempTotalWorkingHrsYTD) * 1000000)
+					//Graph one
+					chartAC.addItem({period: tempPeriod, numberOfinjuries: tempNoOfRepotableInjuries, techRND: tempTechRND, ytd: tempYTD, target: 5.0});
+
+
+				}
+				myChart.dataProvider=chartAC;
+				myAxis.dataProvider=chartAC;
+			}
+
+			public function removeLinkBar(event:ItemClickEvent):void
+			{
+				switch (event.item.name)
+				{
+					case "period":
+						breadCrumdCollection.removeItemAt(event.index);
+						selectedPeriod="all";
+						periodCB.selectedIndex=0;
+						generateFilter();
+						break;
+				}
+			}
+
+			private function dataTipFormatter(hd:HitData):String
+			{
+
+				var s:String;
+				if (hd.element as ColumnSeries)
+				{
+					s="<B>" + ColumnSeries(hd.element).displayName + "</B>\n";
+
+				}
+				else
+				{
+					s="<B>" + LineSeries(hd.element).displayName + "</B>\n";
+				}
+				s+="Period -" + hd.item['period'] + "(%)\n";
+				s+="Lateral - " + hd.item['lateral'] + "(%)\n";
+				s+="Promotion - " + hd.item['promotion'] + "(%)\n";
+				s+="Target - " + hd.item['tarT'] + "(%)\n";
+
+
+				return s;
+			}
+
+			private function saveChart():void
+			{
+				/*var image:ImageSnapshot=ImageSnapshot.captureImage(myChart, 300, new PNGEncoder(), true);
+				var file:FileReference=new FileReference();
+				file.save(image.data, "chart.png");*/
+				
+				CreatePDF.generatePDF(grid,myChart);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</s:layout>
+	<s:BorderContainer id="chartScr" x="0" y="0" width="100%" height="100%" backgroundAlpha="0"
+					   borderVisible="false" horizontalCenter="0">
+		<s:layout>
+			<s:HorizontalLayout/>
+		</s:layout>
+
+		<mx:HBox width="100%">
+			<mx:VBox width="250" backgroundAlpha=".3" backgroundColor="0xFFFFFF"
+					 borderColor="#5D8AA8" borderStyle="outset" cornerRadius="7" paddingBottom="5"
+					 paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:VGroup verticalAlign="middle">
+					<s:Label color="0x000000" text="Chart Type:"/>
+					<mx:ComboBox id="chartType" change="chartChangeHandler()"
+								 dataProvider="{myViewStack}"/>
+				</s:VGroup>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Period:"/>
+					<mx:ComboBox id="periodCB" change="periodChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="Jan 2011" data="Jan 2011"/>
+								<fx:Object label="Feb 2011" data="Feb 2011"/>
+								<fx:Object label="Mar 2011" data="Mar 2011"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Region:"/>
+					<mx:ComboBox id="regionCB" change="regionChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="Europe" data="Europe"/>
+								<fx:Object label="USA" data="USA"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Country:"/>
+					<mx:ComboBox id="countryCB" change="countryChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="USA" data="USA"/>
+								<fx:Object label="United Kingdom" data="United Kingdom"/>
+								<fx:Object label="Denmark" data="Denmark"/>
+								<fx:Object label="Italy" data="Italy"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Function:"/>
+					<mx:ComboBox id="functionCB" change="functionChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="Engineering" data="Engineering"/>
+								<fx:Object label="P&amp;C" data="P&amp;C"/>
+								<fx:Object label="GR&amp;I" data="GR&amp;I"/>
+								<fx:Object label="F&amp;BS" data="F&amp;BS"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Position:"/>
+					<mx:ComboBox id="positionCB" width="230" change="positionChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="Manager - Structure &amp; Systems"
+										   data="Manager - Structure &amp; Systems"/>
+								<fx:Object label="Engineer - ECM" data="Engineer - ECM"/>
+								<fx:Object label="Director" data="Director"/>
+								<fx:Object label="Senior Project Manager - Wind &amp; Site"
+										   data="Senior Project Manager - Wind &amp; Site"/>
+								<fx:Object label="Specialist" data="Specialist"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="IPE:"/>
+					<mx:ComboBox id="ipeCB" change="ipeChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="IPE 53" data="IPE 53"/>
+								<fx:Object label="IPE 54" data="IPE 54"/>
+								<fx:Object label="IPE 55" data="IPE 55"/>
+								<fx:Object label="IPE 56" data="IPE 56"/>
+								<fx:Object label="IPE 57" data="IPE 57"/>
+								<fx:Object label="IPE 58" data="IPE 58"/>
+								<fx:Object label="IPE 59" data="IPE 59"/>
+								<fx:Object label="IPE 60" data="IPE 60"/>
+								<fx:Object label="IPE 61" data="IPE 61"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Job:"/>
+					<mx:ComboBox id="jobCB" change="jobChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="USA" data="USA"/>
+								<fx:Object label="United Kingdom" data="United Kingdom"/>
+								<fx:Object label="Denmark" data="Denmark"/>
+								<fx:Object label="Italy" data="Italy"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+				<mx:HRule width="100%" height="1"/>
+				<s:VGroup verticalAlign="middle">
+					<s:Label width="110" color="0x000000" text="Salaried/Hourly:"/>
+					<mx:ComboBox id="shCB" change="shChangeHandler()">
+						<mx:dataProvider>
+							<fx:Array>
+								<fx:Object label="All" data="all"/>
+								<fx:Object label="USA" data="USA"/>
+								<fx:Object label="United Kingdom" data="United Kingdom"/>
+								<fx:Object label="Denmark" data="Denmark"/>
+								<fx:Object label="Italy" data="Italy"/>
+							</fx:Array>
+						</mx:dataProvider>
+					</mx:ComboBox>
+				</s:VGroup>
+			</mx:VBox>
+			<mx:VBox width="100%" height="100%" borderColor="#5D8AA8" borderStyle="outset">
+				<!-- Define the ViewStack and the three child containers -->
+				<mx:ViewStack id="myViewStack" width="100%" height="100%" backgroundColor="0xFFFFFF"
+							  borderStyle="none" paddingBottom="10" paddingLeft="10"
+							  paddingRight="10" paddingTop="10">
+
+					<s:NavigatorContent id="search" label="Absence - Technology R&amp;D"
+										backgroundColor="0xFFFFFF" fontWeight="bold">
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="left"/>
+						</s:layout>
+
+						<mx:ColumnChart id="myChart" width="100%" height="330"
+										creationComplete="generateFilter()"
+										dataProvider="{chartTTRD}" showDataTips="true">
+							<mx:horizontalAxis>
+								<mx:CategoryAxis id="myAxis" categoryField="period"/>
+							</mx:horizontalAxis>
+							<mx:series>
+								<mx:ColumnSet type="stacked">
+									<mx:ColumnSeries displayName="Number Of Injuries"
+													 showDataEffect="{chartChange}" xField="period"
+													 yField="numberOfinjuries">
+
+									</mx:ColumnSeries>
+									<mx:ColumnSeries displayName="Technology R&amp;D"
+													 showDataEffect="{chartChange}" xField="period"
+													 yField="techRND">
+										<mx:fill>
+											<mx:SolidColor color="0xA3CE00"/>
+										</mx:fill>
+									</mx:ColumnSeries>
+								</mx:ColumnSet>
+
+								<mx:LineSeries displayName="YTD" showDataEffect="{chartChange}"
+											   xField="period" yField="ytd"/>
+								<mx:LineSeries displayName="Target" showDataEffect="{chartChange}"
+											   xField="period" yField="target"/>
+							</mx:series>
+
+						</mx:ColumnChart>
+						<s:HGroup>
+							<mx:Legend dataProvider="{myChart}" direction="horizontal"/>
+							<mx:Spacer width="220"/>
+							<mx:Image buttonMode="true" click="saveChart()" source="{saveImg}"
+									  useHandCursor="true"/>
+						</s:HGroup>
+
+						<mx:DataGrid width="100%" height="100" dataProvider="{chartAC}" fontSize="10" id="grid"
+									 rowHeight="19" sortableColumns="false">
+							<mx:columns>
+								<mx:DataGridColumn dataField="period" headerText="Month &amp; Year"/>
+								<mx:DataGridColumn dataField="numberOfinjuries"
+												   headerText="Number of Injuries"/>
+								<mx:DataGridColumn dataField="techRND"
+												   headerText="Technology R&amp;D"/>
+								<mx:DataGridColumn dataField="ytd" headerText="YTD"/>
+								<mx:DataGridColumn dataField="target" headerText="Target"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</s:NavigatorContent>
+				</mx:ViewStack>
+			</mx:VBox>
+		</mx:HBox>
+	</s:BorderContainer>
+</s:NavigatorContent>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					width="100%"
+					height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.vestas.controller.VestasController;
+			import com.vestas.events.VestasApplicationEvent;
+			import com.vestas.model.UserParams;
+
+			import org.swizframework.Swiz;
+
+			[Autowire(bean="controller")]
+			[Bindable]
+			public var controller:VestasController;
+
+			public function generateChart(event:MouseEvent):void
+			{
+				var view:String=(event.currentTarget as Label).name;
+				Swiz.dispatchEvent(new VestasApplicationEvent(VestasApplicationEvent.CHANGE_VIEW, {view: view}));
+			}
+		]]>
+	</fx:Script>
+	<s:BorderContainer id="containerScr"
+					   backgroundAlpha=".2"
+					   cornerRadius="10"
+					   backgroundColor="0xFFFFFF"
+					   borderVisible="false"
+					   width="100%"
+					   height="100%">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle"
+							  horizontalAlign="center"
+							  paddingBottom="10"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="10"/>
+		</s:layout>
+		<s:Label text="P&amp;C KPI Dashboard"
+				 fontSize="14"
+				 color="0xFFFFFF"
+				 fontWeight="bold"/>
+		<s:VGroup width="100%"
+				  height="100%">
+			<s:HGroup width="100%"
+					  height="100%">
+				<s:Panel cornerRadius="8"
+						 dropShadowVisible="false"
+						 id="pnl1"
+						 title="P&amp;C Reports"
+						 width="100%"
+						 height="100%">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left"
+										  paddingBottom="10"
+										  paddingLeft="10"
+										  paddingRight="10"
+										  paddingTop="10"/>
+					</s:layout>
+					<s:Label text="Employee Turnover"
+							 id="link1"
+							 name="empTurnover"
+							 textDecoration="underline"
+							 fontWeight="bold"
+							 buttonMode="true"
+							 click="generateChart(event)"/>
+					<s:Label text="Retention 12 Months"
+							 name="rentention12Months"
+							 fontWeight="bold"
+							 textDecoration="underline"
+							 buttonMode="true"
+							 click="generateChart(event)"/>
+					<s:Label text="Internal Fill Rate"
+							 name="internalFillRate"
+							 textDecoration="underline"
+							 fontWeight="bold"
+							 buttonMode="true"
+							 click="generateChart(event)"/>
+					<s:Label text="Injuries"
+							 name="injuries"
+							 textDecoration="underline"
+							 fontWeight="bold"
+							 buttonMode="true"
+							 click="generateChart(event)"/>
+					<s:Label text="Absence Details"
+							 name="absence"
+							 fontWeight="bold"
+							 click="generateChart(event)"/>
+				</s:Panel>
+				<s:Panel cornerRadius="8"
+						 id="pnl2"
+						 title="Recruitments"
+						 width="100%"
+						 height="100%"
+						 dropShadowVisible="false">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left"
+										  paddingBottom="10"
+										  paddingLeft="10"
+										  paddingRight="10"
+										  paddingTop="10"/>
+					</s:layout>
+					<s:Label text="In-progress recruitments"/>
+					<s:Label text="Time to Fill"/>
+					<s:Label text="Result from Exit Questionnaire"/>
+				</s:Panel>
+			</s:HGroup>
+			<s:HGroup width="100%"
+					  height="100%">
+				<s:Panel cornerRadius="8"
+						 id="pnl3"
+						 title="Demography"
+						 width="100%"
+						 height="100%"
+						 dropShadowVisible="false">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left"
+										  paddingBottom="10"
+										  paddingLeft="10"
+										  paddingRight="10"
+										  paddingTop="10"/>
+					</s:layout>
+					<s:Label text="Country of Employment"/>
+					<s:Label text="Seniority in Vestas"/>
+					<s:Label text="Seniority in Position"/>
+					<s:Label text="Gender"/>
+					<s:Label text="Nationality"/>
+					<s:Label text="Education"/>
+				</s:Panel>
+				<s:Panel cornerRadius="8"
+						 id="pnl4"
+						 title="Ad-Hoc Reports"
+						 width="100%"
+						 height="100%"
+						 dropShadowVisible="false">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left"
+										  paddingBottom="10"
+										  paddingLeft="10"
+										  paddingRight="10"
+										  paddingTop="10"/>
+					</s:layout>
+					<s:Label text="Span of Control"/>
+					<s:Label text="Position Analysis"/>
+				</s:Panel>
+			</s:HGroup>
+		</s:VGroup>
+
+	</s:BorderContainer>
+
+</s:NavigatorContent>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css" />
+<script type="text/javascript"	src="http://code.jquery.com/jquery-1.5.min.js"></script>
+<script type="text/javascript"	src="http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js"></script>
+
+<script>
+	 $(document).ready(function() {
+		$('#loginForm').submit(function() {
+			alert("");
+		});
+	}); 
+	
+</script>
+</head>
+<body>
+	<div data-role="page" id="vestas">
+		<div data-role="header">
+			<img align="middle" src="images/title.jpg">
+		</div>
+		<div data-role="content">
+			<form method="post" id="loginForm">
+				Username: <input type="text" name="username" value="vestas"><br /> <br />
+				Password: <input type="password" name="password" value="vestas"><br /> 
+						  <input type="submit" value="Login" onclick="onLogin()">
+			</form>
+		</div>
+	</div>
+	
+	<div data-role="page" id="home" hidden="false">
+		<div data-role="header" >
+			<h1>Vestas Home</h1>
+		</div>
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true">
+				<li><a href="pcreports" data-transition="flip">P&C Reports</a></li>
+				<li><a href="recruitment" data-transition="flip">Recruitments</a></li>
+				<li><a href="demography" data-transition="flip">Demography</a></li>
+				<li><a href="adhoc" data-transition="flip">Ad-Hoc Reports</a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="page" id="demography" hidden="true">
+		<div data-role="header">
+		<a href="home" data-icon="back" data-direction="reverse">back</a>
+			<h1>Demography</h1>
+		</div>
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true">
+				<li><a href="">Country of Employment</a></li>
+				<li><a href="">Seniority in Vestas</a></li>
+				<li><a href="">Seniority in Position</a></li>
+				<li><a href="">Gender</a></li>
+				<li><a href="">Nationality</a></li>
+				<li><a href="">Education</a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="page" id="pcreports" hidden="true">
+		<div data-role="header" >
+		<a href="home" data-icon="back" data-direction="reverse">back</a>
+			<h1>P&C Reports</h1>
+		</div>
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true">
+				<li><a href="">Employee Turnover</a></li>
+				<li><a href="">Retention 12 Months</a></li>
+				<li><a href="">Internal Fill Rate</a></li>
+				<li><a href="">Injuries</a></li>
+				<li><a href="">Absence Details</a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="page" id="recruitment" hidden="true">
+		<div data-role="header" >
+		<a href="home" data-icon="back" data-direction="reverse">back</a>
+			<h1>Recruitments</h1>
+		</div>
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true">
+				<li><a href="internal.html" data-transition="flip">In-Progress Recruitment</a></li>
+				<li><a href="injuries.html" data-transition="flip">Time to Fill</a></li>
+				<li><a href="absence.html" data-transition="flip">Result from Exit Questionnaire</a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="page" id="adhoc" hidden="true">
+		<div data-role="header">
+			<a href="home" data-icon="back" data-direction="reverse">back</a>
+			<h1>Ad-Hoc Reports</h1>
+		</div>
+		<div data-role="content">
+			<ul data-role="listview" data-inset="true">
+				<li><a href="">Span of Controls</a></li>
+				<li><a href="">Position Analysis</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+
+</body>
+</body>
+</html>

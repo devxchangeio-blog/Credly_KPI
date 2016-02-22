@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<swiz:BeanLoader xmlns="org.swizframework.util.*"
+				 xmlns:mx="http://www.adobe.com/2006/mxml"
+				 xmlns:controller="com.vestas.controller.*"
+				 xmlns:presentation="com.vestas.pm.*"
+				 xmlns:swiz="http://swiz.swizframework.org"
+				 xmlns:delegate="com.vestas.delegate.*"
+				 xmlns:utils="com.vestas.utils.preloader.*"
+				 xmlns:utils1="com.vestas.utils.*">
+	<mx:RemoteObject id="remoteObject" destination="remoteInterface"/>
+	
+	<!-- CONTROLLERS -->
+	<controller:VestasController id="controller" delegate="{delegate}"/>
+	<delegate:VestasDelegate id="delegate" remoteObjectInterface="{remoteObject}"/>
+	<!-- PRESENTATION MODELS -->
+	<presentation:VestasPresentationModel id="allStuffsPM"/>
+	<!--utils:SpinningPreloader id="preLoader"/-->
+	<utils1:VestasProgressbar id="preLoader"/>
+	
+</swiz:BeanLoader>
